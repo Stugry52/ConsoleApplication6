@@ -63,6 +63,20 @@ public:
         records[capacity - 1] = DamageRecord{attacker, target, damage};
     }
     
+    void Print() const
+    {
+        cout << "История урона: " <<  endl;
+        
+        for (int i = 0; i < count; ++i)
+        {
+            cout << i + 1 << ". ";
+            cout << records[i].attackerName << " -> ";
+            cout << records[i].targetName << ": ";
+            cout << records[i].damage << " урона";
+            cout << endl;
+        }
+    }
+    
     DamageHistory(const DamageHistory& other)
     {
         capacity = other.capacity; // Берем capacity из другого объекта
@@ -74,11 +88,32 @@ public:
             records[i] = other.records[i];
         }
     }
+    
+    DamageHistory& operator=(const DamageHistory& other){
+        if (this == &other) // Проверка не присваивается ли самому себе
+        {
+            return *this; // Просто возвращаем текущий объект
+        }
+        
+        delete[] records; // Освобождаем старый массив текущего объета
+        
+        capacity = other.capacity; // Копируем вместимость
+        count = other.count;   // Копируем ко-во
+        records = new DamageRecord[capacity];  // Выделяем память под новый массив
+
+
+        for (int i = 0; i < count; ++i)
+        {
+            records[i] = other.records[i]; // Копируем каждую запись по одной из прошлого массива
+        }
+        
+        return *this; // Возвращаем скопированный объект
+    }
 };
 
 
 // Допустим есть объект
-DamageHistory a(3);
+//DamageHistory a(3);
 // Внутри него a.records -> [record][record1][record2]
 // Теперь, если напишем:
 //DamageHistory b = a;
@@ -113,15 +148,52 @@ DamageHistory a(3);
 ////////////////////////////////////////////////////
 // Плохой пример поверхностного копирования
 
+// copy assigment operator
+DamageHistory a(3);
+DamageHistory b(5);
+
+// b = a;
+// b как объект уже существует 
+// То есть это не copy constructor, а оператор
+//DamageHistory& operator=(const DamageHistory& other);
+// Он вызывается, когда мы присваиваем один существующий объект, другому
+///////////////////////
+// Чем они отличаются?
+// copy constructor создает новый объект DamageHistory b = a; (тут b еще не существовал)
+// a copy assigment - перезаписывает уже существующий объект b = a; (b уже существовал и возможно имел свою память)
+// Поэтому assigment copy должен:
+// Проверить не присваиваем ли объет самому себе
+// удалить старую память 
+// выделить новую память
+// скопировать данные
+// и вернуть *this
 
 
 int main(int argc, char* argv[])
 {
-    DamageHistory a(3); // Создаем пустой журнал
+    setlocale(LC_ALL, "Russia");
+    DamageHistory original(3); // Создаем пустой журнал
     
-    a.Add("Oleg", "Stas", 10);
+    original.Add("Oleg", "Stas", 10);
+    original.Add("Oleg", "Kirill", 12);
     
-    DamageHistory b = a; // ОПАСНО - будет ошибка shallow copy
+    DamageHistory copy = original; // Вызваем copy constructor и копируем
+    
+    copy.Add("Kirill", "Oleg", 5);
+    
+    DamageHistory c(1);
+    c = b; // copy assigment operator
+    
+    cout << "Original: " << endl;
+    original.Print();
+    
+    cout << "Copy: " << endl;
+    copy.Print();
+    
+    cout << "C: " << endl;
+    copy.Print();
+    
+    //DamageHistory b = a; // ОПАСНО - будет ошибка shallow copy
     
     return 0;
 }
