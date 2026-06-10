@@ -111,6 +111,84 @@ public:
     }
 };
 
+class EventLog{
+private: // Закрытая часть класса
+    string* lines;
+    int capacity;   // макс. кол-во в коде
+    int count;      // текущее кол-во
+    
+public: // Открытая часть кода
+    EventLog(int maxLines){   // Конструктор принимает макс. число строк
+        if (maxLines <= 0)
+        {
+            maxLines = 1;
+        }
+        lines = new string[maxLines];  // Выделяем память под строки
+        capacity = maxLines;
+        count = 0;
+    }
+    
+    ~EventLog(){   // Автовызов деконструктора
+        delete[] lines;
+        lines = nullptr;
+        capacity = 0;
+        count = 0;
+    }
+    
+    void Add(const string& line){
+        if (count < capacity){
+            lines[count] = line;   // Кладем строку в свободное место, если оно есть
+            count++;
+            return;
+        }
+
+        for (int i = 0; i < count; i++){
+            lines[i] = lines[i + 1];
+        }
+        lines[capacity - 1] = line;   // Кладем новую строку в конец списка
+    }
+    
+    void Print() const{    // Печатаем лог и не изменяем объект
+        cout << "Event Log: " << endl;
+        for (int i = 0; i < count; i++){
+            cout << "- " << lines[i] << endl;
+        }
+    }
+    
+    EventLog(const EventLog& other)
+    {
+        capacity = other.capacity; 
+        count = other.count;    
+        lines = new string[capacity]; 
+    
+        for (int i = 0; i < count; i++) 
+        {
+            lines[i] = other.lines[i];
+        }
+    }
+    
+    EventLog& operator=(const EventLog& other)
+    {
+        if (this == &other)
+        {
+            return *this;
+        }
+        
+        delete[] lines;
+        
+        capacity = other.capacity; 
+        count = other.count;   
+        lines = new string[capacity];
+        
+        for (int i = 0; i < count; i++)
+        {
+            lines[i] = other.lines[i];
+        }
+        
+        return *this;
+    }
+};
+
 
 // Допустим есть объект
 //DamageHistory a(3);
